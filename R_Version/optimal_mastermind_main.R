@@ -1,5 +1,5 @@
 library(cli)
-# This file is for getting info on repeating digits in first guesses, AND NOTHING ELSE
+
 n <- 5
 c <- 6
 
@@ -42,6 +42,50 @@ find_guess_structure <- function(guesses) {
   #return(guess_info[1,])
 }
 
+combo_to_guesses <- function(combos) {
+  guesses <- matrix(nrow = 0, ncol = sum(combos[1,]))
+  for (combo in combos) {
+    guess <- c()
+    color <- 1
+    for (num in combo) {
+      guess <- c(guess, rep(color, num))
+      color <- color + 1
+    }
+    guesses <- rbind(guesses, guess)
+  }
+  return(guesses)
+}
+
+possible_combos <- function(n_colors, n_pins) {
+  combos <- list()
+  for (i in 1:floor(n_pins/2)) {
+    temp <- c(i, rep(1, n_pins-i))
+    #print(temp)
+    combos <- append(combos, list(sort(temp)))
+  }
+  #print(combos)
+  for (rep in 1:(n_pins-1)) {
+    for (i in combos) {
+      if (1 %in% i) {
+        n_ones <- length(which(i==1))
+        for (j in 1:n_ones) {
+          temp <- c( i[which(i!=1)], j)
+          if (j < n_ones) {
+            temp <- c(temp, rep(1, (n_ones-j) ) )
+          }
+          #print(i)
+          #print(temp)
+          #print("")
+          combos <- append(combos, list(sort(temp)))
+        }
+      }
+    }
+  }
+  #print(combos)
+  print("finished")
+  return(unique(combos))
+}
+possible_combos(2, 6)
 
 
 get_response <- function(guess, pass) {
