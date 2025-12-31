@@ -1,22 +1,28 @@
 library(cli)
 
-n <- 5
-c <- 6
-
-space <- matrix(nrow=c^n, ncol=n)
-
-for (i in 1:n) {
-  column_c <- c()
-  for (j in 1:c) {
-    column_c <- c(column_c, rep(j, c^(n-i)))
+create_space <- function(c, n) {
+  space <- matrix(nrow=c^n, ncol=n)
+  
+  for (i in 1:n) {
+    column_c <- c()
+    for (j in 1:c) {
+      column_c <- c(column_c, rep(j, c^(n-i)))
+    }
+    space[,i] <- rep(column_c, c^(i-1))
   }
-  space[,i] <- rep(column_c, c^(i-1))
+  return(space)
 }
 
-o_space <- space
-
-password <- space[sample(1:(c^n),1),]
-password
+find_guess_structure <- function(guess) {
+  guess_info <- c()
+  u <- unique(guess)
+  n_occurences <- c()
+  for (j in u) {
+    n_occurences <- c(n_occurences, length(which(guess==j)))
+  }
+  guess_info <- sort(n_occurences)
+  return(guess_info)
+}
 
 combo_to_guesses <- function(combos) {
   guesses <- matrix(nrow = 0, ncol = sum(combos[[1]]))
@@ -121,14 +127,6 @@ select_best_guess <- function(space, o_space) {
   }
   cli_progress_done()
   correct_values <- which(round(info, digits=6)==max(round(info, digits=6)))
-  print("ospace")
-  print(o_space)
-  print(info)
-  print(which(round(info, digits=6)==max(round(info, digits=6))))
-  print("guesslist")
-  print(o_space[which(round(info, digits=6)==max(round(info, digits=6))),])
-  print(length(o_space[,1]))
-  print(o_space[sample(which(round(info, digits=6)==max(round(info, digits=6))), 1),,drop=FALSE])
   if (length(correct_values) > 1) {
     return(o_space[sample(correct_values, 1),]) 
   } else {
@@ -136,27 +134,21 @@ select_best_guess <- function(space, o_space) {
   }
 }
 
-guess <- c(0,0,0)
-it <- 0
-guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c)))
-response <- get_response(guess, password)
-space <- trim_space(guess, response, space)
-it <- it + 1
-print("First Guess")
-print(guess)
-while (!all(guess == password) && length(space[,1])>1) {
-  guess <- select_best_guess(space, o_space)
-  #print("Guess")
-  #print(guess)
-  #print("Space")
-  #print(space)
-  response <- get_response(guess, password)
-  space <- trim_space(guess, response, space)
-  it <- it + 1
+### RUNTIME CODE ###
+
+n_list <- c(7, 7, 7, 8, 8, 8)
+c_list <- c(6, 7, 8, 6, 7, 8)
+
+for (i in 1:length(n_list)) {
+  n <- n_list[i]
+  c <- c_list[i]
+  space <- create_space(c, n)
+  guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c)))
+  print("OPTIMUM FIRST GUESS FOR")
+  print(paste("n=", n, sep = ""))
+  print(paste("c=", c, sep = ""))
+  print("Guess:")
+  print(guess)
+  print("Guess Structure:")
+  print(find_guess_structure(guess))
 }
-print("Success Space")
-space
-print("Password")
-password
-print("Iterations")
-it
