@@ -1,5 +1,5 @@
-n <- 4
-c <- 4
+n <- 6
+c <- 3
 
 space <- matrix(nrow=c^n, ncol=n)
 
@@ -75,8 +75,23 @@ select_best_guess <- function(space, o_space) {
   }
   print("Info")
   print(info)
-  print(o_space[which(info==max(info), 1),])
-  return(o_space[sample(which(info==max(info)), 1),])
+  print("max")
+  print(max(info))
+  print("Which")
+  #print(as.double(info)==as.double(4.052252))
+  #print(str(info[722]))
+  #print(info==max(info))
+  #print(which(info==max(info)))
+  #print(which.max(info))
+  #print(info==4.052252)
+  #print(round(info*1000000)==max(round(info*1000000)))
+  #print("Values")
+  #print(o_space[which(info==max(info)),])
+  print(round(info, digits=6))
+  print(round(info, digits=6)==max(round(info, digits=6)))
+  print("Values")
+  print(o_space[which(round(info, digits=6)==max(round(info, digits=6))),])
+  return(o_space[sample(which(round(info, digits=6)==max(round(info, digits=6))), 1),])
 }
 
 #select_best_guess(space, o_space)
@@ -99,3 +114,31 @@ print("Password")
 password
 print("Iterations")
 it
+
+
+
+find_guess_structure <- function(guesses) {
+  guess_info <- matrix(nrow = length(guesses[,1]), ncol = length(unique(guesses[1,])))
+  for (i in 1:length(guesses[,1])) {
+    u <- unique(i)
+    n_occurences <- c()
+    for (j in u) {
+      n_occurences <- c(n_occurences, length(which(i==j)))
+    }
+    tryCatch(guess_info[i,] <- sort(n_occurences), finally = stop("Not all guesses were equivalent."))
+  }
+  for (i in 2:length(guess_info[,1])) {
+    if (!all(guess_info[i,]==guess_info[i-1,])) {
+      stop("Not all guesses were equivalent.")
+    }
+  }
+  return(guess_info)
+}
+
+print("First Guess Info")
+find_guess_structure()
+
+
+
+
+
