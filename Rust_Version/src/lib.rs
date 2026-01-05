@@ -102,6 +102,16 @@ impl Space {
     fn get_full_space(&self) -> Vec<Row> {
         self.full_space.clone()
     }
+    pub fn check_for_final_guess(&self, current_guess: &Row) -> Row {
+        let space_size = self.get_space_size();
+        if space_size == 1 {
+            self.current_space[0].clone()
+        } else if space_size > 1 {
+            current_guess.clone()
+        } else {
+            panic!()
+        }
+    }
     pub fn choose_password(&self) -> Row {
         let mut rng = rand::rng();
         self.full_space.iter().choose(&mut rng).unwrap().clone()
@@ -159,7 +169,7 @@ impl Space {
     pub fn run_turn(&mut self, password: &Row) -> Row {
         let guess = self.select_best_guess();
         self.trim_space(&guess, &guess.get_response(&password));
-        guess
+        self.check_for_final_guess(&guess)
     }
 }
 
