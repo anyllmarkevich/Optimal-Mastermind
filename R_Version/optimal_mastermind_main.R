@@ -24,16 +24,18 @@ find_guess_structure <- function(guess) {
   return(guess_info)
 }
 
-combo_to_guesses <- function(combos) {
+combo_to_guesses <- function(combos, total_colors) {
   guesses <- matrix(nrow = 0, ncol = sum(combos[[1]]))
+  n_pins <- sum(combos[[1]])
+  n_cols <- length(combos[[1]])
   for (combo in combos) {
     guess <- c()
-    color <- 1
-    for (num in combo) {
-      guess <- c(guess, rep(color, num))
-      color <- color + 1
+    colors <- sample(1:total_colors, n_cols, replace = FALSE)
+    for (i in 1:length(combo)) {
+      num <- combo[i]
+      guess <- c(guess, rep(colors[i], num))
     }
-    guesses <- rbind(guesses, guess)
+    guesses <- rbind(guesses, sample(guess))
   }
   rownames(guesses) <- NULL
   return(guesses)
@@ -133,17 +135,16 @@ select_best_guess <- function(space, o_space) {
     return(o_space[correct_values[1],])
   }
 }
-
 ### RUNTIME CODE ###
 
-n_list <- c(7, 7, 7, 8, 8, 8)
-c_list <- c(6, 7, 8, 6, 7, 8)
+n_list <- c(5)
+c_list <- c(6)
 
 for (i in 1:length(n_list)) {
   n <- n_list[i]
   c <- c_list[i]
   space <- create_space(c, n)
-  guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c)))
+  guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c), c))
   print("OPTIMUM FIRST GUESS FOR")
   print(paste("n=", n, sep = ""))
   print(paste("c=", c, sep = ""))
