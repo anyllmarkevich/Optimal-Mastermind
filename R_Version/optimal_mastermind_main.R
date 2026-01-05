@@ -1,7 +1,7 @@
 library(cli)
 
-n <- 4
-c <- 4
+n <- 5
+c <- 5
 
 space <- matrix(nrow=c^n, ncol=n)
 
@@ -130,25 +130,32 @@ select_best_guess <- function(space, o_space) {
   }
 }
 
+print_output <- function(guess, response, it) {
+  print(paste("GUESS #", it, sep=""))
+  print(guess)
+  print("RESPONSE")
+  print(paste("Correct color, wrong spot: ", response[1]))
+  print(paste("Correct color, correct spot: ", response[2]))
+}
+
 guess <- c(0,0,0)
 it <- 0
 guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c), c))
 response <- get_response(guess, password)
 space <- trim_space(guess, response, space)
 it <- it + 1
-print("Guess #1")
-print(guess)
+print_output(guess, response, it)
 while (!all(guess == password) && length(space[,1])>1) {
   guess <- select_best_guess(space, o_space)
   it <- it + 1
-  print(paste("Guess #", it, sep=""))
-  print(guess)
   response <- get_response(guess, password)
-  print("Response")
-  print(response)
   space <- trim_space(guess, response, space)
+  print_output(guess, response, it)
 }
-it<-it+1
+
+if (!all(guess == space[1,])) {
+  it<-it+1
+}
 print("SUCCESS")
 print("Final Guess:")
 print(space[1,])
