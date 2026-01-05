@@ -137,8 +137,8 @@ select_best_guess <- function(space, o_space) {
 }
 ### RUNTIME CODE ###
 
-n_list <- c(5)
-c_list <- c(6)
+n_list <- c(5, 5)
+c_list <- c(5, 6)
 
 for (i in 1:length(n_list)) {
   n <- n_list[i]
