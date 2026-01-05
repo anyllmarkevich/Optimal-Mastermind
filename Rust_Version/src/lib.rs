@@ -1,4 +1,6 @@
 use itertools::Itertools;
+use rand;
+use rand::seq::IteratorRandom;
 use rayon;
 
 struct Response {
@@ -95,6 +97,10 @@ impl Space {
     }
     fn get_full_space(&self) -> Vec<Row> {
         self.full_space.clone()
+    }
+    fn choose_password(&self) -> Row {
+        let mut rng = rand::rng();
+        self.full_space.iter().choose(&mut rng).unwrap().clone()
     }
 }
 
