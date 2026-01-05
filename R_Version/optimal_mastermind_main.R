@@ -18,16 +18,18 @@ o_space <- space
 password <- space[sample(1:(c^n),1),]
 password
 
-combo_to_guesses <- function(combos) {
+combo_to_guesses <- function(combos, total_colors) {
   guesses <- matrix(nrow = 0, ncol = sum(combos[[1]]))
+  n_pins <- sum(combos[[1]])
+  n_cols <- length(combos[[1]])
   for (combo in combos) {
     guess <- c()
-    color <- 1
-    for (num in combo) {
-      guess <- c(guess, rep(color, num))
-      color <- color + 1
+    colors <- sample(1:total_colors, n_cols, replace = FALSE)
+    for (i in 1:length(combo)) {
+      num <- combo[i]
+      guess <- c(guess, rep(colors[i], num))
     }
-    guesses <- rbind(guesses, guess)
+    guesses <- rbind(guesses, sample(guess))
   }
   rownames(guesses) <- NULL
   return(guesses)
@@ -138,7 +140,7 @@ select_best_guess <- function(space, o_space) {
 
 guess <- c(0,0,0)
 it <- 0
-guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c)))
+guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c), c))
 response <- get_response(guess, password)
 space <- trim_space(guess, response, space)
 it <- it + 1
