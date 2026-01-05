@@ -27,7 +27,7 @@ impl Response {
 }
 
 #[derive(Clone)]
-struct Row {
+pub struct Row {
     vals: Vec<u8>,
     num_colors: u8,
     num_pins: u8,
@@ -40,7 +40,7 @@ impl Row {
             num_pins: vals.len() as u8,
         }
     }
-    fn get_vals(&self) -> Vec<u8> {
+    pub fn get_vals(&self) -> Vec<u8> {
         self.vals.clone()
     }
     fn get_response(&self, password: &Row) -> Response {
@@ -76,14 +76,14 @@ impl Row {
     }
 }
 
-struct Space {
+pub struct Space {
     current_space: Vec<Row>,
     full_space: Vec<Row>,
     num_colors: u8,
     num_pins: u8,
 }
 impl Space {
-    fn build(num_colors: u8, num_pins: u8) -> Space {
+    pub fn build(num_colors: u8, num_pins: u8) -> Space {
         let original_space: Vec<Row> = std::iter::repeat((1..=num_colors).into_iter())
             .take(num_pins.into())
             .multi_cartesian_product()
@@ -102,11 +102,11 @@ impl Space {
     fn get_full_space(&self) -> Vec<Row> {
         self.full_space.clone()
     }
-    fn choose_password(&self) -> Row {
+    pub fn choose_password(&self) -> Row {
         let mut rng = rand::rng();
         self.full_space.iter().choose(&mut rng).unwrap().clone()
     }
-    fn trim_space(&mut self, guess: Row, response: Response) {
+    fn trim_space(&mut self, guess: &Row, response: &Response) {
         //self.current_space = vec![Row::new(vec![1, 1, 1], 3)]
         self.current_space = self
             .current_space
@@ -129,11 +129,11 @@ impl Space {
         let length = responses.iter().len() as f32;
         frequencies
             .iter()
-            .map(|(key, v)| *v as f32 / length as f32)
+            .map(|(_, v)| *v as f32 / length as f32)
             .map(|y| -y * y.log2())
             .sum()
     }
-    fn select_best_guess(&self) -> Row {
+    pub fn select_best_guess(&self) -> Row {
         let info_of_guesses: Vec<(&Row, f32)> = self
             .full_space
             .iter()
@@ -152,6 +152,14 @@ impl Space {
             .collect();
         let mut rng = rand::rng();
         best_guesses.iter().choose(&mut rng).unwrap().clone()
+    }
+    pub fn get_space_size(&self) -> usize {
+        self.current_space.iter().len()
+    }
+    pub fn run_turn(&mut self, password: &Row) -> Row {
+        let guess = self.select_best_guess();
+        self.trim_space(&guess, &guess.get_response(&password));
+        guess
     }
 }
 
