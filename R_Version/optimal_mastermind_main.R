@@ -1,7 +1,7 @@
 library(cli)
 
-n <- 5
-c <- 6
+n <- 4
+c <- 4
 
 space <- matrix(nrow=c^n, ncol=n)
 
@@ -123,14 +123,6 @@ select_best_guess <- function(space, o_space) {
   }
   cli_progress_done()
   correct_values <- which(round(info, digits=6)==max(round(info, digits=6)))
-  print("ospace")
-  print(o_space)
-  print(info)
-  print(which(round(info, digits=6)==max(round(info, digits=6))))
-  print("guesslist")
-  print(o_space[which(round(info, digits=6)==max(round(info, digits=6))),])
-  print(length(o_space[,1]))
-  print(o_space[sample(which(round(info, digits=6)==max(round(info, digits=6))), 1),,drop=FALSE])
   if (length(correct_values) > 1) {
     return(o_space[sample(correct_values, 1),]) 
   } else {
@@ -144,21 +136,23 @@ guess <- select_best_guess(space, combo_to_guesses(valid_combos(n, c), c))
 response <- get_response(guess, password)
 space <- trim_space(guess, response, space)
 it <- it + 1
-print("First Guess")
+print("Guess #1")
 print(guess)
 while (!all(guess == password) && length(space[,1])>1) {
   guess <- select_best_guess(space, o_space)
-  #print("Guess")
-  #print(guess)
-  #print("Space")
-  #print(space)
-  response <- get_response(guess, password)
-  space <- trim_space(guess, response, space)
   it <- it + 1
+  print(paste("Guess #", it, sep=""))
+  print(guess)
+  response <- get_response(guess, password)
+  print("Response")
+  print(response)
+  space <- trim_space(guess, response, space)
 }
-print("Success Space")
-space
-print("Password")
+it<-it+1
+print("SUCCESS")
+print("Final Guess:")
+print(space[1,])
+print("Password:")
 password
-print("Iterations")
+print("Number of Guesses Used:")
 it
