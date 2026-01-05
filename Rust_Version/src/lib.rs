@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use rand;
 use rand::seq::IteratorRandom;
-use rayon;
+use rayon::prelude::*;
 use std::collections::HashMap;
 
 struct Response {
@@ -146,7 +146,7 @@ impl Space {
     pub fn select_best_guess(&self) -> Row {
         let info_of_guesses: Vec<(&Row, f32)> = self
             .full_space
-            .iter()
+            .par_iter()
             .map(|x| (x, self.info_of_guess(x)))
             .collect();
         let max_guess = info_of_guesses
