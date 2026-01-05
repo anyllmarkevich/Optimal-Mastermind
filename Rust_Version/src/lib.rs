@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use rayon;
 
 struct Response {
@@ -19,6 +20,7 @@ impl Response {
     }
 }
 
+#[derive(Clone)]
 struct Row {
     vals: Vec<u8>,
     num_colors: u8,
@@ -68,6 +70,28 @@ impl Row {
     }
 }
 
+struct Space {
+    vals: Vec<Row>,
+    num_colors: u8,
+    num_pins: u8,
+}
+impl Space {
+    fn build(num_colors: u8, num_pins: u8) -> Space {
+        Space {
+            vals: std::iter::repeat((1..=num_colors).into_iter())
+                .take(num_pins.into())
+                .multi_cartesian_product()
+                .map(|a| Row::new(a, num_colors))
+                .collect(),
+            num_colors,
+            num_pins,
+        }
+    }
+    fn get_vals(&self) -> Vec<Row> {
+        self.vals.clone()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -79,5 +103,14 @@ mod tests {
         let response = row_1.get_response(row_2);
         assert_eq!(response.right_color, 1);
         assert_eq!(response.right_place, 2);
+    }
+    #[test]
+    fn space_is_properly_created() {
+        let num_pins: u8 = 4;
+        let num_colors: u8 = 3;
+        assert!(
+            Space::build(num_colors, num_pins).get_vals().iter().len()
+                == (num_colors.pow(num_pins.into()).into())
+        );
     }
 }
