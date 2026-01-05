@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use rand;
-use rand::seq::IteratorRandom;
+use rand::seq::{IteratorRandom, SliceRandom};
 use rayon::prelude::*;
 use std::collections::HashMap;
 
@@ -170,6 +170,37 @@ impl Space {
         let guess = self.select_best_guess();
         self.trim_space(&guess, &guess.get_response(&password));
         self.check_for_final_guess(&guess)
+    }
+}
+
+struct Combo {
+    vals: Vec<u8>,
+    num_colors: u8,
+    num_pins: u8,
+}
+impl Combo {
+    fn new(color_vector: Vec<u8>, num_colors: u8, num_pins: u8) -> Combo {
+        Combo {
+            vals: color_vector,
+            num_colors,
+            num_pins,
+        }
+    }
+    fn combo_to_guess(&self) -> Row {
+        let mut rng = rand::rng();
+        let mut colors: Vec<u8> = (1..=self.num_colors).collect();
+        let num_needed_colors = self.vals.iter().len();
+        colors.shuffle(&mut rng);
+        let colors = &colors[0..num_needed_colors];
+        let mut guess: Vec<u8> = self
+            .vals
+            .iter()
+            .zip(colors.iter())
+            .flat_map(|(rep, col)| std::iter::repeat_n(col, *rep as usize))
+            .cloned()
+            .collect();
+        guess.shuffle(&mut rng);
+        Row::new(guess, self.num_colors)
     }
 }
 
