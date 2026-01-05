@@ -2,6 +2,7 @@ use itertools::Itertools;
 use rand;
 use rand::seq::IteratorRandom;
 use rayon;
+use std::collections::HashMap;
 
 struct Response {
     right_color: u8,
@@ -19,6 +20,9 @@ impl Response {
     }
     fn right_place(&self) -> u8 {
         self.right_place
+    }
+    fn get_tuple(&self) -> (u8, u8) {
+        (self.right_color, self.right_place)
     }
 }
 
@@ -39,7 +43,7 @@ impl Row {
     fn get_vals(&self) -> Vec<u8> {
         self.vals.clone()
     }
-    fn get_response(&self, password: Row) -> Response {
+    fn get_response(&self, password: &Row) -> Response {
         let pass = password.get_vals();
         let num_matching_pins: usize = self
             .vals
@@ -102,6 +106,53 @@ impl Space {
         let mut rng = rand::rng();
         self.full_space.iter().choose(&mut rng).unwrap().clone()
     }
+    fn trim_space(&mut self, guess: Row, response: Response) {
+        //self.current_space = vec![Row::new(vec![1, 1, 1], 3)]
+        self.current_space = self
+            .current_space
+            .iter()
+            .cloned()
+            .filter(|x| guess.get_response(x).get_tuple() == response.get_tuple())
+            .collect()
+    }
+    fn info_of_guess(&self, guess: &Row) -> f32 {
+        let responses: Vec<(u8, u8)> = self
+            .current_space
+            .iter()
+            .cloned()
+            .map(|x| guess.get_response(&x).get_tuple())
+            .collect();
+        let mut frequencies: HashMap<(u8, u8), u32> = HashMap::new();
+        for &item in &responses {
+            *frequencies.entry(item).or_insert(0) += 1;
+        }
+        let length = responses.iter().len() as f32;
+        frequencies
+            .iter()
+            .map(|(key, v)| *v as f32 / length as f32)
+            .map(|y| -y * y.log2())
+            .sum()
+    }
+    fn select_best_guess(&self) -> Row {
+        let info_of_guesses: Vec<(&Row, f32)> = self
+            .full_space
+            .iter()
+            .map(|x| (x, self.info_of_guess(x)))
+            .collect();
+        let max_guess = info_of_guesses
+            .iter()
+            .map(|&(_, v)| v)
+            .max_by(f32::total_cmp)
+            .unwrap();
+        let best_guesses: Vec<Row> = info_of_guesses
+            .iter()
+            .cloned()
+            .filter(|&(_, b)| b == max_guess)
+            .map(|(a, _)| a.clone())
+            .collect();
+        let mut rng = rand::rng();
+        best_guesses.iter().choose(&mut rng).unwrap().clone()
+    }
 }
 
 #[cfg(test)]
@@ -112,7 +163,7 @@ mod tests {
     fn responses_make_sense() {
         let row_1 = Row::new(vec![1, 2, 2, 3, 5], 6);
         let row_2 = Row::new(vec![1, 6, 5, 3, 6], 6);
-        let response = row_1.get_response(row_2);
+        let response = row_1.get_response(&row_2);
         assert_eq!(response.right_color, 1);
         assert_eq!(response.right_place, 2);
     }
