@@ -71,24 +71,30 @@ impl Row {
 }
 
 struct Space {
-    vals: Vec<Row>,
+    current_space: Vec<Row>,
+    full_space: Vec<Row>,
     num_colors: u8,
     num_pins: u8,
 }
 impl Space {
     fn build(num_colors: u8, num_pins: u8) -> Space {
+        let original_space: Vec<Row> = std::iter::repeat((1..=num_colors).into_iter())
+            .take(num_pins.into())
+            .multi_cartesian_product()
+            .map(|a| Row::new(a, num_colors))
+            .collect();
         Space {
-            vals: std::iter::repeat((1..=num_colors).into_iter())
-                .take(num_pins.into())
-                .multi_cartesian_product()
-                .map(|a| Row::new(a, num_colors))
-                .collect(),
+            current_space: original_space.clone(),
+            full_space: original_space,
             num_colors,
             num_pins,
         }
     }
-    fn get_vals(&self) -> Vec<Row> {
-        self.vals.clone()
+    fn get_current_space(&self) -> Vec<Row> {
+        self.current_space.clone()
+    }
+    fn get_full_space(&self) -> Vec<Row> {
+        self.full_space.clone()
     }
 }
 
@@ -109,7 +115,10 @@ mod tests {
         let num_pins: u8 = 4;
         let num_colors: u8 = 3;
         assert!(
-            Space::build(num_colors, num_pins).get_vals().iter().len()
+            Space::build(num_colors, num_pins)
+                .get_current_space()
+                .iter()
+                .len()
                 == (num_colors.pow(num_pins.into()).into())
         );
     }
