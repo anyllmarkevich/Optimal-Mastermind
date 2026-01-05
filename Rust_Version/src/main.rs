@@ -1,4 +1,4 @@
-use Rust_Version::{Row, Space};
+use optimal_mastermind::{Row, Space};
 
 const N_COLORS: u8 = 5;
 const N_PINS: u8 = 5;
@@ -14,6 +14,5 @@ fn main() {
             break;
         }
     }
-    println!("Guess was: {:?}", guess.get_vals());
     println!("Password was: {:?}", &password.get_vals());
 }

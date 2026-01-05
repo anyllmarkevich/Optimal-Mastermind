@@ -3,15 +3,6 @@
 version = 3
 
 [[package]]
-name = "Rust_Version"
-version = "0.1.0"
-dependencies = [
- "itertools",
- "rand",
- "rayon",
-]
-
-[[package]]
 name = "cfg-if"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -74,6 +65,15 @@ name = "libc"
 version = "0.2.179"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5a2d376baa530d1238d133232d15e239abad80d05838b4b59354e5268af431f"
+
+[[package]]
+name = "optimal_mastermind"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "rand",
+ "rayon",
+]
 
 [[package]]
 name = "ppv-lite86"
