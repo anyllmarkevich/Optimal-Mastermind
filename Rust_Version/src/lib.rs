@@ -67,3 +67,17 @@ impl Row {
         Response::new(num_matching_colors as u8, num_matching_pins as u8)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn responses_make_sense() {
+        let row_1 = Row::new(vec![1, 2, 2, 3, 5], 6);
+        let row_2 = Row::new(vec![1, 6, 5, 3, 6], 6);
+        let response = row_1.get_response(row_2);
+        assert_eq!(response.right_color, 1);
+        assert_eq!(response.right_place, 2);
+    }
+}
