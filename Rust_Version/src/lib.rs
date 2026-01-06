@@ -50,7 +50,6 @@ impl Row {
             .iter()
             .zip(pass.iter())
             .filter(|&(a, b)| a == b)
-            .map(|(&a, _)| a)
             .count();
         let mut num_matching_colors: usize = (1..=self.num_colors)
             .into_iter()
@@ -65,13 +64,6 @@ impl Row {
             })
             .sum();
         num_matching_colors -= num_matching_pins;
-        let num_matching_pins = self
-            .vals
-            .iter()
-            .zip(pass.iter())
-            .filter(|&(a, b)| a == b)
-            .map(|(&a, _)| a)
-            .count();
         Response::new(num_matching_colors as u8, num_matching_pins as u8)
     }
 }
@@ -139,8 +131,14 @@ impl Space {
         let length = responses.len() as f32;
         frequencies
             .iter()
-            .map(|(_, v)| *v as f32 / length as f32)
-            .map(|y| -y * y.log2())
+            .map(|((_, _), v)| {
+                //println!("{:?}", v);
+                *v as f32 / length as f32
+            })
+            .map(|y| {
+                //println!("{:?}", y);
+                -y * y.log2()
+            })
             .sum()
     }
     pub fn select_best_guess(&self) -> Row {
@@ -163,6 +161,7 @@ impl Space {
             .map(|(a, _)| a.clone())
             .collect();
         let mut rng = rand::rng();
+        //println!("{:?}", best_guesses);
         best_guesses.iter().choose(&mut rng).unwrap().clone()
     }
     pub fn get_space_size(&self) -> usize {
