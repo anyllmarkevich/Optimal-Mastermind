@@ -166,10 +166,24 @@ impl Space {
     pub fn get_space_size(&self) -> usize {
         self.current_space.iter().len()
     }
-    pub fn run_turn(&mut self, password: &Row) -> Row {
-        let guess = self.select_best_guess();
-        self.trim_space(&guess, &guess.get_response(&password));
-        self.check_for_final_guess(&guess)
+    pub fn run_turn(&mut self, password: &Row, first_turn_optimization: &bool) -> Row {
+        if *first_turn_optimization {
+            let combos = Combo::find_possible_starting_combos(self.num_colors, self.num_pins);
+            let options = combos.iter().map(|x| x.combo_to_guess()).collect();
+            let temp_space = Space {
+                current_space: self.current_space.clone(),
+                full_space: options,
+                num_colors: self.num_colors,
+                num_pins: self.num_pins,
+            };
+            let guess = temp_space.select_best_guess();
+            self.trim_space(&guess, &guess.get_response(&password));
+            self.check_for_final_guess(&guess)
+        } else {
+            let guess = self.select_best_guess();
+            self.trim_space(&guess, &guess.get_response(&password));
+            self.check_for_final_guess(&guess)
+        }
     }
 }
 
@@ -244,7 +258,7 @@ impl Combo {
             }
         }
     }
-    fn find_possible_starting_combos(num_colors: u8, num_pins: u8) -> Vec<Combo> {
+    pub fn find_possible_starting_combos(num_colors: u8, num_pins: u8) -> Vec<Combo> {
         let mut possible_combos: Vec<Combo> = Vec::new();
         Self::next_num_search(
             &mut Vec::new(),

@@ -1,7 +1,7 @@
 use optimal_mastermind::{Row, Space};
 use std::time::Instant;
 
-const N_COLORS: u8 = 5;
+const N_COLORS: u8 = 6;
 const N_PINS: u8 = 5;
 
 fn main() {
@@ -9,8 +9,10 @@ fn main() {
     let password = space.choose_password();
     let mut guess: Row;
     let start_time = Instant::now();
+    let mut first_turn = true;
     loop {
-        guess = space.run_turn(&password);
+        guess = space.run_turn(&password, &first_turn);
+        first_turn = false;
         println!("Guess was: {:?}", guess.get_vals());
         if space.get_space_size() <= 1 {
             break;
