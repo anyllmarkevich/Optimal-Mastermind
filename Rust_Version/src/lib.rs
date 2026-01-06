@@ -173,6 +173,7 @@ impl Space {
     }
 }
 
+#[derive(Clone, Debug)]
 struct Combo {
     vals: Vec<u8>,
     num_colors: u8,
@@ -185,6 +186,12 @@ impl Combo {
             num_colors,
             num_pins,
         }
+    }
+    fn get_vals(&self) -> Vec<u8> {
+        self.vals.clone()
+    }
+    fn get_num_used_colors(&self) -> u8 {
+        self.vals.len() as u8
     }
     fn combo_to_guess(&self) -> Row {
         let mut rng = rand::rng();
@@ -201,6 +208,56 @@ impl Combo {
             .collect();
         guess.shuffle(&mut rng);
         Row::new(guess, self.num_colors)
+    }
+    fn next_num_search(
+        current: &mut Vec<u8>,
+        n_left: &u8,
+        possible_combos: &mut Vec<Combo>,
+        num_colors: &u8,
+        num_pins: &u8,
+    ) {
+        if *n_left == 0 && current.iter().len() as u8 <= *num_colors {
+            possible_combos.push(Combo::new(current.to_vec(), *num_colors, *num_pins));
+        } else if *n_left != 0 {
+            for i in 1..=*n_left {
+                if current.iter().len() == 0 {
+                    let mut temp_current = current.clone();
+                    temp_current.push(i);
+                    Self::next_num_search(
+                        &mut temp_current,
+                        &(n_left - i),
+                        possible_combos,
+                        &num_colors,
+                        &num_pins,
+                    )
+                } else if i >= current[current.len() - 1] {
+                    let mut temp_current = current.clone();
+                    temp_current.push(i);
+                    Self::next_num_search(
+                        &mut temp_current,
+                        &(n_left - i),
+                        possible_combos,
+                        &num_colors,
+                        &num_pins,
+                    )
+                }
+            }
+        }
+    }
+    fn find_possible_starting_combos(num_colors: u8, num_pins: u8) -> Vec<Combo> {
+        let mut possible_combos: Vec<Combo> = Vec::new();
+        Self::next_num_search(
+            &mut Vec::new(),
+            &num_pins,
+            &mut possible_combos,
+            &num_pins,
+            &num_colors,
+        );
+        possible_combos
+            .iter()
+            .cloned()
+            .filter(|x| x.get_num_used_colors() <= num_colors)
+            .collect()
     }
 }
 
@@ -227,5 +284,23 @@ mod tests {
                 .len()
                 == (num_colors.pow(num_pins.into()).into())
         );
+    }
+    #[test]
+    fn possible_combos_correct() {
+        let combos = Combo::find_possible_starting_combos(4, 6);
+        let correct_output: Vec<Vec<u8>> = vec![
+            vec![1, 1, 1, 3],
+            vec![1, 1, 2, 2],
+            vec![1, 1, 4],
+            vec![1, 2, 3],
+            vec![1, 5],
+            vec![2, 2, 2],
+            vec![2, 4],
+            vec![3, 3],
+            vec![6],
+        ];
+        for i in 0..combos.len() {
+            assert_eq!(combos[i].get_vals(), correct_output[i]);
+        }
     }
 }
