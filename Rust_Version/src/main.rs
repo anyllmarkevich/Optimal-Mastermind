@@ -1,8 +1,8 @@
 use optimal_mastermind::{Row, Space};
 use std::time::Instant;
 
-const N_COLORS: u8 = 6;
-const N_PINS: u8 = 5;
+const N_COLORS: u8 = 3;
+const N_PINS: u8 = 4;
 
 fn main() {
     let mut space = Space::build(N_COLORS, N_PINS);

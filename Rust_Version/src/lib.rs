@@ -26,7 +26,7 @@ impl Response {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Row {
     vals: Vec<u8>,
     num_colors: u8,
@@ -136,7 +136,7 @@ impl Space {
         for &item in &responses {
             *frequencies.entry(item).or_insert(0) += 1;
         }
-        let length = responses.iter().len() as f32;
+        let length = responses.len() as f32;
         frequencies
             .iter()
             .map(|(_, v)| *v as f32 / length as f32)
@@ -149,11 +149,13 @@ impl Space {
             .par_iter()
             .map(|x| (x, self.info_of_guess(x)))
             .collect();
+        println!("{:?}", info_of_guesses);
         let max_guess = info_of_guesses
             .iter()
             .map(|&(_, v)| v)
             .max_by(f32::total_cmp)
             .unwrap();
+        println!("Max guess: {:?}", max_guess);
         let best_guesses: Vec<Row> = info_of_guesses
             .iter()
             .cloned()
@@ -316,5 +318,18 @@ mod tests {
         for i in 0..combos.len() {
             assert_eq!(combos[i].get_vals(), correct_output[i]);
         }
+    }
+    #[test]
+    fn possible_starting_combos_checking_ground() {
+        let combos = Combo::find_possible_starting_combos(3, 4);
+        for i in combos {
+            println!("{:?}", i.get_vals());
+        }
+    }
+    #[test]
+    fn check_on_guess_conversion() {
+        let test = Combo::new(vec![2, 2], 3, 4);
+        println!("Vals: {:?}", test.get_vals());
+        println!("G: {:?}", test.combo_to_guess().get_vals());
     }
 }
