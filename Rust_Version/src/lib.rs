@@ -133,11 +133,17 @@ impl Space {
             .iter()
             .map(|((_, _), v)| {
                 //println!("{:?}", v);
-                *v as f32 / length as f32
+                {
+                    //println!("v: {:?}", v);
+                    *v as f32 / length as f32
+                }
             })
             .map(|y| {
                 //println!("{:?}", y);
-                -y * y.log2()
+                {
+                    //println!("y: {:?}", y);
+                    -y * y.log2()
+                }
             })
             .sum()
     }
@@ -147,13 +153,13 @@ impl Space {
             .par_iter()
             .map(|x| (x, self.info_of_guess(x)))
             .collect();
-        println!("{:?}", info_of_guesses);
+        //println!("{:?}", info_of_guesses);
         let max_guess = info_of_guesses
             .iter()
             .map(|&(_, v)| v)
             .max_by(f32::total_cmp)
             .unwrap();
-        println!("Max guess: {:?}", max_guess);
+        //println!("Max guess: {:?}", max_guess);
         let best_guesses: Vec<Row> = info_of_guesses
             .iter()
             .cloned()
@@ -209,6 +215,7 @@ impl Combo {
         self.vals.len() as u8
     }
     fn combo_to_guess(&self) -> Row {
+        //println!("{:?}", self);
         let mut rng = rand::rng();
         let mut colors: Vec<u8> = (1..=self.num_colors).collect();
         let num_needed_colors = self.vals.iter().len();
@@ -265,8 +272,8 @@ impl Combo {
             &mut Vec::new(),
             &num_pins,
             &mut possible_combos,
-            &num_pins,
             &num_colors,
+            &num_pins,
         );
         possible_combos
             .iter()

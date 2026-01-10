@@ -80,6 +80,8 @@ select_best_guess <- function(space, o_space) {
   for (i in 1:length(o_space[,1])) {
     info <- c(info, info_of_guess(o_space[i,], space))
     cli_progress_update()
+    print(info)
+    print(o_space[i,])
   }
   cli_progress_done()
   correct_values <- which(round(info, digits=6)==max(round(info, digits=6)))
